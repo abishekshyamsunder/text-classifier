@@ -13,6 +13,9 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.model_selection import train_test_split
 from sklearn.multioutput import MultiOutputClassifier
 from sklearn.metrics import classification_report
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
+from sklearn.metrics import f1_score
 
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
@@ -98,6 +101,13 @@ def build_model(X,y):
 	print(grid.best_score_)
 	y_pred = grid.predict(X_test)
 	print('Accuracy on test set is: ',(y_pred == y_test).mean().mean())
+	i = 0
+	for column in y_test:
+		print('Column Name: ',column)
+		print('Precision\t: ',precision_score(y_test[column],y_pred[:,i],average=None))
+		print('Recall\t\t: ',recall_score(y_test[column],y_pred[:,i],average=None))
+		print('f1_score\t: ',f1_score(y_test[column],y_pred[:,i],average=None))
+		i = i + 1
 	return grid
 
 def save_model(model_file_name,grid):
