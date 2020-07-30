@@ -8,9 +8,19 @@ from nltk.tokenize import word_tokenize
 from flask import Flask
 from flask import render_template, request, jsonify
 from plotly.graph_objs import Bar
+from sklearn.metrics import fbeta_score, make_scorer
 from sklearn.externals import joblib
 from sqlalchemy import create_engine
 
+
+def my_custom_loss_func(ground_truth, predictions):
+    '''
+    Grid Searches do not support multiclass-multioutput.
+    This is a custom loss_function ('can be thought of as accuracy') to deal with multiclass output
+    Fed to Grid Search as a parameter 
+    '''
+    acc = (ground_truth==predictions).mean().mean()
+    return acc
 
 app = Flask(__name__)
 
@@ -26,11 +36,11 @@ def tokenize(text):
     return clean_tokens
 
 # load data
-engine = create_engine('sqlite:///../data/YourDatabaseName.db')
-df = pd.read_sql_table('YourTableName', engine)
+engine = create_engine('sqlite:///../data/DisasterResponse1.db')
+df = pd.read_sql_table('messages', engine)
 
 # load model
-model = joblib.load("../models/your_model_name.pkl")
+model = joblib.load("../models/best_model1.pkl")
 
 
 # index webpage displays cool visuals and receives user input text for model
@@ -42,7 +52,15 @@ def index():
     # TODO: Below is an example - modify to extract data for your own visuals
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
+
+    columns = []
+    percentage = []
+    df_small = df.iloc[:,4:]
+    for column in df_small:
+        columns.append(column)
+        percentage.append(df[column].sum()/df.shape[0])
     
+    accuracy_percentage = [0.683920,0.828751,0.996007,0.582245,0.921364,0.951313,0.972201,0.983106,0.967440,1.000000,0.937951,0.888804,0.908923,0.986484,0.978652,0.988942, 0.965443,0.954538,0.864998,0.934726,0.957764,0.947781,0.978344,0.994778,0.989710,0.996314,0.985870,0.956689,0.688834,0.903701,0.906927,0.988481,0.909538,0.980034,0.948856,0.797727]
     # create visuals
     # TODO: Below is an example - modify to create your own visuals
     graphs = [
@@ -61,6 +79,42 @@ def index():
                 },
                 'xaxis': {
                     'title': "Genre"
+                }
+            }
+        },
+        {
+            'data': [
+                Bar(
+                    x=columns,
+                    y=percentage
+                )
+            ],
+
+            'layout': {
+                'title': 'Distribution of Message Categories',
+                'yaxis': {
+                    'title': "Percentage"
+                },
+                'xaxis': {
+                    'title': "Category"
+                }
+            }
+        },
+        {
+            'data': [
+                Bar(
+                    x=columns,
+                    y=accuracy_percentage
+                )
+            ],
+
+            'layout': {
+                'title': 'Accuracy percentage for each Category obtained by model',
+                'yaxis': {
+                    'title': "Percentage"
+                },
+                'xaxis': {
+                    'title': "Category"
                 }
             }
         }
