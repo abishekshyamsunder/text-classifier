@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 import sqlalchemy
 import sys
+import os.path
+from os import path
 
 def load_and_merge_datasets(csv_file_1 = "disaster_messages.csv",csv_file_2 = "disaster_categoriess.csv"):
 	'''
@@ -68,10 +70,13 @@ def main():
 	if len(sys.argv) !=4:
 		print('Please run script as `python process_data.py disaster_messages.csv disaster_categoriess.csv database.db`')
 	else:
+
 		args = sys.argv
 		csv_file_1 = args[1]
 		csv_file_2 = args[2]
 		db = args[3]
+		if path.exists(db):
+			os.system('rm -r '+db)
 		print('Loading data...\n    MESSAGES: {}\n    CATEGORIES: {}'.format(csv_file_1, csv_file_2))
 		(messages,categories,df) = load_and_merge_datasets(csv_file_1,csv_file_2)
 		print('Cleaning data...')
@@ -79,7 +84,6 @@ def main():
 		df = concat_dfs(df,categories)
 		print('Saving data...\n    DATABASE: {}'.format(db))
 		push_to_db(df,db)
-		print(df)
 
 if __name__=="__main__":
 	main()

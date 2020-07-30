@@ -14,6 +14,9 @@
 
 
 2. Run the following command in the app's directory to run your web app.
+	The run.py file expects the model in the models folder to be named best_model1.pkl.  
+	Therefore, before running the web app, DO ANY 1 OF THE BELOW TWO STEPS
+	- Rename the model in the models folder to best_model1.pkl (if it is not already that)
     `python run.py`
 
 3. Go to http://0.0.0.0:3001/
